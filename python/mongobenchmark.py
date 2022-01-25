@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     # Insert all docs using 8 threads
     processes = list()
-    for i in range(2):
+    for i in range(8):
         p = mp.Process(target=worker, args=(i,))
         processes.append(p)
         p.start()
