@@ -3,23 +3,39 @@ import multiprocessing as mp
 import time
 
 import pymongo
+def retrunDict():
+    for i in range(6250):
+        docs=[]
+        docs = [{"title": "Dune", "author": "Frank Herbert"}]
+        for j in range(33):
+            docs.append({"title": "I, Robot", "author": "Isaac Asimov"})
+            docs.append({"title": "Foundation", "author": "Isaac Asimov"})
+            docs.append({"title": "Brave New World", "author": "Aldous Huxley"})
+        yield docs
 
 
 def worker(count):
     myclient = pymongo.MongoClient("mongodb://localhost:27017/")
     mydb = myclient["test"]
     mycol = mydb["python"]
+    m = 0
+    for i in retrunDict():
+        mycol.insert_many(i)
+    # docs = [{"title": "Dune", "author": "Frank Herbert"}]
+    # for j in range(33):
+    #     docs.append({"title": "I, Robot", "author": "Isaac Asimov"})
+    #     docs.append({"title": "Foundation", "author": "Isaac Asimov"})
+    #     docs.append({"title": "Brave New World", "author": "Aldous Huxley"})
 
-    docs = [{"title": "Dune", "author": "Frank Herbert"}]
-    for j in range(33):
-        docs.append({"title": "I, Robot", "author": "Isaac Asimov"})
-        docs.append({"title": "Foundation", "author": "Isaac Asimov"})
-        docs.append({"title": "Brave New World", "author": "Aldous Huxley"})
-
-    for i in range(6250):
-        mycol.insert_many(copy.deepcopy(docs))
+    # for i in range(6250):
+    #     s = time.perf_counter()
+    #     temp = copy.deepcopy(docs)
+    #     t = time.perf_counter()
+    #     m+=(t-s)
+    #     mycol.insert_many(temp)
 
     myclient.close()
+    
     return
 
 
@@ -33,7 +49,10 @@ if __name__ == '__main__':
     start = time.time()
 
     # Insert all docs using 8 threads
-    processes = list()
+    # processes = [mp.Process(target=worker, args=(i,)) for i in range(8)]
+    # for p in processes:
+    #     p.start()
+    processes=[]
     for i in range(8):
         p = mp.Process(target=worker, args=(i,))
         processes.append(p)
@@ -59,3 +78,5 @@ if __name__ == '__main__':
 
     end = time.time()
     print(u'Fetch time: ', end - start)
+    mycol.drop()
+    myclient.close()
